@@ -274,7 +274,7 @@ function initMap() {
     actualizarMapa();
 }
 
-// Función para agregar marcadores de reporte
+// Función para agregar marcadores de reporte mejorada
 function addReportMarker(reporte) {
     const iconosReporte = {
         basura: L.divIcon({
@@ -304,7 +304,8 @@ function addReportMarker(reporte) {
     };
 
     const marker = L.marker(reporte.coordenadas, {
-        icon: iconosReporte[reporte.tipo]
+        icon: iconosReporte[reporte.tipo],
+        riseOnHover: true
     });
 
     const popupContent = `
@@ -340,6 +341,22 @@ function addReportMarker(reporte) {
         maxWidth: 300,
         className: 'custom-popup'
     });
+
+    // Efecto de animación al hacer hover
+    marker.on('mouseover', function() {
+        this.openPopup();
+        this.setIcon(L.divIcon({
+            className: 'report-icon ' + reporte.tipo + ' pulse',
+            html: iconosReporte[reporte.tipo].options.html,
+            iconSize: [35, 35],
+            popupAnchor: [0, -15]
+        }));
+    });
+
+    marker.on('mouseout', function() {
+        this.setIcon(iconosReporte[reporte.tipo]);
+    });
+
     marker.addTo(map);
     return marker;
 }
@@ -474,47 +491,6 @@ function animateValue(element, start, end, duration) {
     window.requestAnimationFrame(step);
 }
 
-// Función para actualizar estadísticas mejorada
-function actualizarEstadisticas() {
-    // Actualizar KPIs con animación
-    const totalReports = reportes.length;
-    const activeUsers = new Set(reportes.map(r => r.usuario)).size;
-    const protectedAreas = Math.floor(reportes.length / 10);
-    const completedChallenges = usuarioActual.retos.filter(r => r.completado).length;
-
-    animateValue(document.getElementById('totalReportsKPI'), 0, totalReports, 1000);
-    animateValue(document.getElementById('activeUsersKPI'), 0, activeUsers, 1000);
-    animateValue(document.getElementById('protectedAreasKPI'), 0, protectedAreas, 1000);
-    animateValue(document.getElementById('completedChallengesKPI'), 0, completedChallenges, 1000);
-
-    // Actualizar estadísticas de usuario
-    document.getElementById('userLevel').textContent = CONFIG.NIVELES[usuarioActual.nivel].icono;
-    animateValue(document.getElementById('userPoints'), 0, usuarioActual.puntos, 1000);
-    animateValue(document.getElementById('userReports'), 0, usuarioActual.reportes.length, 1000);
-    animateValue(document.getElementById('userVerifications'), 0, usuarioActual.verificaciones.length, 1000);
-
-    // Actualizar estadísticas en tiempo real
-    document.getElementById('totalReports').textContent = totalReports;
-    document.getElementById('activeUsers').textContent = activeUsers;
-
-    // Actualizar progreso de retos
-    const retoSinBasura = usuarioActual.retos.find(r => r.nombre === '#RetoSinBasura');
-    const adoptaArbol = usuarioActual.retos.find(r => r.nombre === '#AdoptaUnÁrbol');
-
-    if (retoSinBasura) {
-        const progress = (retoSinBasura.progreso / CONFIG.RETOS.RETO_SIN_BASURA.meta) * 100;
-        document.querySelector('.challenge-item:nth-child(1) .progress').style.width = `${progress}%`;
-    }
-
-    if (adoptaArbol) {
-        const progress = (adoptaArbol.progreso / CONFIG.RETOS.ADOPTA_ARBOL.meta) * 100;
-        document.querySelector('.challenge-item:nth-child(2) .progress').style.width = `${progress}%`;
-    }
-
-    // Actualizar gráficas
-    updateCharts();
-}
-
 // Función para mostrar notificaciones mejorada
 function mostrarNotificacion(mensaje, tipo) {
     const notificacion = document.createElement('div');
@@ -538,6 +514,55 @@ function mostrarNotificacion(mensaje, tipo) {
         notificacion.style.animation = 'slideOut 0.3s ease-out';
         setTimeout(() => notificacion.remove(), 300);
     }, 3000);
+}
+
+// Función para actualizar estadísticas mejorada
+function actualizarEstadisticas() {
+    // Actualizar KPIs con animación
+    const totalReports = reportes.length;
+    const activeUsers = new Set(reportes.map(r => r.usuario)).size;
+    const protectedAreas = Math.floor(reportes.length / 10);
+    const completedChallenges = usuarioActual.retos.filter(r => r.completado).length;
+
+    // Animación de conteo para cada KPI
+    animateValue(document.getElementById('totalReportsKPI'), 0, totalReports, 1000);
+    animateValue(document.getElementById('activeUsersKPI'), 0, activeUsers, 1000);
+    animateValue(document.getElementById('protectedAreasKPI'), 0, protectedAreas, 1000);
+    animateValue(document.getElementById('completedChallengesKPI'), 0, completedChallenges, 1000);
+
+    // Actualizar estadísticas de usuario con efectos visuales
+    const userLevelElement = document.getElementById('userLevel');
+    userLevelElement.textContent = CONFIG.NIVELES[usuarioActual.nivel].icono;
+    userLevelElement.style.animation = 'pulse 1s ease-in-out';
+
+    animateValue(document.getElementById('userPoints'), 0, usuarioActual.puntos, 1000);
+    animateValue(document.getElementById('userReports'), 0, usuarioActual.reportes.length, 1000);
+    animateValue(document.getElementById('userVerifications'), 0, usuarioActual.verificaciones.length, 1000);
+
+    // Actualizar estadísticas en tiempo real
+    document.getElementById('totalReports').textContent = totalReports;
+    document.getElementById('activeUsers').textContent = activeUsers;
+
+    // Actualizar progreso de retos con animación
+    const retoSinBasura = usuarioActual.retos.find(r => r.nombre === '#RetoSinBasura');
+    const adoptaArbol = usuarioActual.retos.find(r => r.nombre === '#AdoptaUnÁrbol');
+
+    if (retoSinBasura) {
+        const progress = (retoSinBasura.progreso / CONFIG.RETOS.RETO_SIN_BASURA.meta) * 100;
+        const progressBar = document.querySelector('.challenge-item:nth-child(1) .progress');
+        progressBar.style.width = `${progress}%`;
+        progressBar.style.transition = 'width 1s ease-in-out';
+    }
+
+    if (adoptaArbol) {
+        const progress = (adoptaArbol.progreso / CONFIG.RETOS.ADOPTA_ARBOL.meta) * 100;
+        const progressBar = document.querySelector('.challenge-item:nth-child(2) .progress');
+        progressBar.style.width = `${progress}%`;
+        progressBar.style.transition = 'width 1s ease-in-out';
+    }
+
+    // Actualizar gráficas
+    updateCharts();
 }
 
 // Inicialización de las gráficas
@@ -656,4 +681,15 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Inicializar KPIs con valores iniciales
     actualizarEstadisticas();
+
+    // Agregar efecto de parallax al scroll
+    window.addEventListener('scroll', () => {
+        const scrolled = window.pageYOffset;
+        const parallaxElements = document.querySelectorAll('.hero-section, .impact-section, .kpi-section');
+        
+        parallaxElements.forEach(element => {
+            const speed = element.dataset.speed || 0.5;
+            element.style.backgroundPositionY = (scrolled * speed) + 'px';
+        });
+    });
 }); 
