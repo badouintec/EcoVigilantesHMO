@@ -6,6 +6,13 @@
     --white: #FFFFFF;
     --light-gray: #F5F5F5;
     --dark-gray: #333333;
+    --success-green: #4CAF50;
+    --warning-orange: #FF9800;
+    --error-red: #F44336;
+    --info-blue: #2196F3;
+    --novato-color: #8BC34A;
+    --guardian-color: #4CAF50;
+    --maestro-color: #2E7D32;
 }
 
 /* Reset y estilos base */
@@ -112,6 +119,262 @@ h2 {
     margin-bottom: 0.5rem;
 }
 
+/* Reportes y Popups */
+.report-popup {
+    min-width: 250px;
+}
+
+.report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.severity-badge {
+    background-color: var(--warning-orange);
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+}
+
+.report-photo {
+    width: 100%;
+    height: auto;
+    border-radius: 5px;
+    margin: 0.5rem 0;
+}
+
+.report-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.verify-btn, .comment-btn {
+    padding: 0.5rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    transition: transform 0.2s;
+}
+
+.verify-btn:hover, .comment-btn:hover {
+    transform: scale(1.05);
+}
+
+.verify-btn {
+    background-color: var(--success-green);
+    color: white;
+}
+
+.comment-btn {
+    background-color: var(--info-blue);
+    color: white;
+}
+
+.comments-section {
+    margin-top: 1rem;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.comment {
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--light-gray);
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--dark-gray);
+    margin-bottom: 0.3rem;
+}
+
+.comment-content {
+    margin-bottom: 0.3rem;
+}
+
+.comment-actions {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.comment-like {
+    cursor: pointer;
+    color: var(--info-blue);
+}
+
+.comment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.comment-form textarea {
+    padding: 0.5rem;
+    border: 1px solid var(--light-gray);
+    border-radius: 5px;
+    resize: none;
+    height: 60px;
+}
+
+.comment-form button {
+    padding: 0.5rem;
+    background-color: var(--forest-green);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Notificaciones */
+.notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 1rem;
+    border-radius: 5px;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    min-width: 300px;
+}
+
+.notification-content {
+    flex-grow: 1;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 0.2rem;
+}
+
+.notification.info {
+    background-color: var(--info-blue);
+}
+
+.notification.success {
+    background-color: var(--success-green);
+}
+
+.notification.warning {
+    background-color: var(--warning-orange);
+}
+
+.notification.error {
+    background-color: var(--error-red);
+}
+
+.notification.achievement {
+    background-color: var(--earth-brown);
+}
+
+.notification.challenge {
+    background-color: var(--forest-green);
+}
+
+/* Ranking y Niveles */
+.ranking-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--light-gray);
+}
+
+.level-badge {
+    padding: 0.2rem 0.5rem;
+    border-radius: 15px;
+    font-size: 0.9rem;
+}
+
+.level-badge.novato {
+    background-color: var(--novato-color);
+}
+
+.level-badge.guardian {
+    background-color: var(--guardian-color);
+}
+
+.level-badge.maestro {
+    background-color: var(--maestro-color);
+}
+
+.points {
+    font-weight: bold;
+    color: var(--forest-green);
+}
+
+/* Retos */
+.challenge-item {
+    padding: 0.5rem;
+    border-radius: 5px;
+    background-color: var(--light-gray);
+    margin-bottom: 0.5rem;
+}
+
+.challenge-progress {
+    height: 5px;
+    background-color: var(--light-gray);
+    border-radius: 5px;
+    margin-top: 0.5rem;
+    overflow: hidden;
+}
+
+.challenge-progress-bar {
+    height: 100%;
+    background-color: var(--forest-green);
+    transition: width 0.3s;
+}
+
+.challenge-completed {
+    background-color: var(--success-green);
+    color: white;
+}
+
+/* Logros */
+.achievement-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 5px;
+    background-color: var(--light-gray);
+    margin-bottom: 0.5rem;
+}
+
+.achievement-icon {
+    font-size: 1.5rem;
+}
+
+.achievement-info {
+    flex-grow: 1;
+}
+
+.achievement-name {
+    font-weight: bold;
+}
+
+.achievement-description {
+    font-size: 0.8rem;
+    color: var(--dark-gray);
+}
+
 /* Footer */
 footer {
     background-color: var(--forest-green);
@@ -154,14 +417,66 @@ footer {
     .logo-container h1 {
         font-size: 1.5rem;
     }
+
+    .report-popup {
+        min-width: 200px;
+    }
+
+    .notification {
+        min-width: auto;
+        max-width: 90%;
+        left: 50%;
+        transform: translateX(-50%);
+    }
 }
 
 /* Animaciones */
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(20px); }
 }
 
 .fade-in {
     animation: fadeIn 0.5s ease-in;
+}
+
+.fade-out {
+    animation: fadeOut 0.5s ease-out;
+}
+
+/* Personalización de Leaflet */
+.leaflet-popup-content {
+    margin: 0;
+}
+
+.leaflet-popup-content-wrapper {
+    padding: 0;
+}
+
+.leaflet-popup-tip {
+    background-color: var(--white);
+}
+
+.leaflet-control-layers {
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.leaflet-control-layers-toggle {
+    background-color: var(--white);
+}
+
+.leaflet-control-layers-expanded {
+    background-color: var(--white);
+    padding: 0.5rem;
+}
+
+/* Heatmap */
+.leaflet-heatmap-layer {
+    opacity: 0.7;
 } 
