@@ -226,6 +226,14 @@ function cargarDatosSimulados() {
 
 // Inicialización del mapa
 function initMap() {
+    // Verificar si el elemento del mapa existe
+    const mapElement = document.getElementById('map');
+    if (!mapElement) {
+        console.error('Elemento del mapa no encontrado');
+        return;
+    }
+
+    // Inicializar el mapa
     map = L.map('map', {
         zoomControl: true,
         maxZoom: 18,
@@ -249,30 +257,21 @@ function initMap() {
         })
     };
 
+    // Añadir capa base por defecto
     baseLayers["OpenStreetMap"].addTo(map);
 
-    // Capas de heatmap
-    heatmapLayers = {
-        "Reportes de Basura": L.layerGroup(),
-        "Reportes de Fuego": L.layerGroup(),
-        "Reportes de Plantas": L.layerGroup(),
-        "Reportes de Agua": L.layerGroup()
-    };
+    // Añadir control de capas
+    L.control.layers(baseLayers).addTo(map);
 
-    // Agregar controles de capas
-    L.control.layers(baseLayers, heatmapLayers).addTo(map);
-
-    // Event listeners para los botones de capas
-    document.querySelectorAll('.layer-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const layerName = btn.dataset.layer;
-            document.querySelectorAll('.layer-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            
-            Object.values(baseLayers).forEach(layer => layer.remove());
-            baseLayers[layerName].addTo(map);
-        });
+    // Añadir marcadores de áreas protegidas
+    CONFIG.AREAS_PROTEGIDAS.forEach(area => {
+        L.marker(area.coordenadas)
+            .bindPopup(`<b>${area.nombre}</b><br>${area.tipo}`)
+            .addTo(map);
     });
+
+    // Añadir marcadores de reportes
+    actualizarMapa();
 }
 
 // Función para agregar marcadores de reporte
@@ -541,154 +540,109 @@ function mostrarNotificacion(mensaje, tipo) {
     }, 3000);
 }
 
-// Función para inicializar gráficas
+// Inicialización de las gráficas
 function initCharts() {
-    // Destruir gráficas existentes si existen
-    if (reportTypesChart) {
-        reportTypesChart.destroy();
-    }
-    if (monthlyTrendChart) {
-        monthlyTrendChart.destroy();
-    }
-
-    // Datos de ejemplo
-    const reportData = {
-        tipos: {
-            basura: reportes.filter(r => r.tipo === 'basura').length,
-            fuego: reportes.filter(r => r.tipo === 'fuego').length,
-            planta: reportes.filter(r => r.tipo === 'planta').length,
-            agua: reportes.filter(r => r.tipo === 'agua').length
+    // Gráfica de tipos de reportes
+    const reportTypesCtx = document.getElementById('reportTypesChart').getContext('2d');
+    reportTypesChart = new Chart(reportTypesCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Basura', 'Fuego', 'Plantas', 'Agua'],
+            datasets: [{
+                data: [0, 0, 0, 0],
+                backgroundColor: [
+                    'rgba(255, 152, 0, 0.8)',
+                    'rgba(244, 67, 54, 0.8)',
+                    'rgba(76, 175, 80, 0.8)',
+                    'rgba(33, 150, 243, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(255, 152, 0, 1)',
+                    'rgba(244, 67, 54, 1)',
+                    'rgba(76, 175, 80, 1)',
+                    'rgba(33, 150, 243, 1)'
+                ],
+                borderWidth: 1
+            }]
         },
-        tendencia: {
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Gráfica de tendencia mensual
+    const monthlyTrendCtx = document.getElementById('monthlyTrendChart').getContext('2d');
+    monthlyTrendChart = new Chart(monthlyTrendCtx, {
+        type: 'line',
+        data: {
             labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
-            data: [10, 15, 20, 25, 30, 35]
-        }
-    };
-
-    // Configuración común
-    const commonOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: {
-            duration: 1000,
-            easing: 'easeInOutQuart'
+            datasets: [{
+                label: 'Reportes',
+                data: [0, 0, 0, 0, 0, 0],
+                backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                borderColor: 'rgba(76, 175, 80, 1)',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true
+            }]
         },
-        plugins: {
-            legend: {
-                position: 'bottom',
-                labels: {
-                    font: {
-                        size: 12,
-                        family: "'Inter', sans-serif"
-                    },
-                    padding: 20
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
                 }
             }
         }
-    };
-
-    // Inicializar gráfica de tipos de reportes
-    const reportTypesCtx = document.getElementById('reportTypesChart');
-    if (reportTypesCtx) {
-        reportTypesChart = new Chart(reportTypesCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Basura', 'Fuego', 'Plantas', 'Agua'],
-                datasets: [{
-                    data: Object.values(reportData.tipos),
-                    backgroundColor: [
-                        'rgba(255, 152, 0, 0.8)',
-                        'rgba(244, 67, 54, 0.8)',
-                        'rgba(76, 175, 80, 0.8)',
-                        'rgba(33, 150, 243, 0.8)'
-                    ],
-                    borderColor: [
-                        'rgba(255, 152, 0, 1)',
-                        'rgba(244, 67, 54, 1)',
-                        'rgba(76, 175, 80, 1)',
-                        'rgba(33, 150, 243, 1)'
-                    ],
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                ...commonOptions,
-                cutout: '70%',
-                plugins: {
-                    ...commonOptions.plugins,
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const label = context.label || '';
-                                const value = context.raw || 0;
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = Math.round((value / total) * 100);
-                                return `${label}: ${value} (${percentage}%)`;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    // Inicializar gráfica de tendencia mensual
-    const monthlyTrendCtx = document.getElementById('monthlyTrendChart');
-    if (monthlyTrendCtx) {
-        monthlyTrendChart = new Chart(monthlyTrendCtx, {
-            type: 'line',
-            data: {
-                labels: reportData.tendencia.labels,
-                datasets: [{
-                    label: 'Reportes',
-                    data: reportData.tendencia.data,
-                    borderColor: 'rgba(46, 125, 50, 0.8)',
-                    backgroundColor: 'rgba(46, 125, 50, 0.1)',
-                    tension: 0.4,
-                    fill: true,
-                    pointBackgroundColor: 'rgba(46, 125, 50, 1)',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 4,
-                    pointHoverRadius: 6
-                }]
-            },
-            options: {
-                ...commonOptions,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.1)'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    }
-                }
-            }
-        });
-    }
+    });
 }
 
-// Función para actualizar gráficas
+// Actualización de las gráficas
 function updateCharts() {
-    if (reportTypesChart || monthlyTrendChart) {
-        initCharts();
-    }
+    if (!reportTypesChart || !monthlyTrendChart) return;
+
+    // Actualizar gráfica de tipos de reportes
+    const reportTypes = reportes.reduce((acc, reporte) => {
+        acc[reporte.tipo] = (acc[reporte.tipo] || 0) + 1;
+        return acc;
+    }, {});
+
+    reportTypesChart.data.datasets[0].data = [
+        reportTypes.basura || 0,
+        reportTypes.fuego || 0,
+        reportTypes.planta || 0,
+        reportTypes.agua || 0
+    ];
+    reportTypesChart.update();
+
+    // Actualizar gráfica de tendencia mensual
+    const monthlyData = reportes.reduce((acc, reporte) => {
+        const month = new Date(reporte.fecha).getMonth();
+        acc[month] = (acc[month] || 0) + 1;
+        return acc;
+    }, {});
+
+    monthlyTrendChart.data.datasets[0].data = Array(6).fill(0).map((_, i) => monthlyData[i] || 0);
+    monthlyTrendChart.update();
 }
 
-// Inicialización cuando el DOM esté listo
+// Inicializar todo cuando el DOM esté cargado
 document.addEventListener('DOMContentLoaded', () => {
     initMap();
+    initCharts();
     cargarDatosSimulados();
-    
-    // Inicializar gráficas después de un pequeño retraso
-    setTimeout(() => {
-        initCharts();
-    }, 500);
     
     // Inicializar AOS con configuración mejorada
     AOS.init({
