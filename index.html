@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoVigilantes HMO</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Nuestros estilos -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <h1>EcoVigilantes HMO</h1>
+            <p class="slogan">Si todos vemos, todos cuidamos</p>
+        </div>
+        <button id="reportButton" class="report-button">
+            <i class="fas fa-plus-circle"></i> Reportar incidencia
+        </button>
+    </header>
+
+    <main>
+        <div class="map-container">
+            <div id="map"></div>
+        </div>
+
+        <aside class="sidebar">
+            <div class="stats-card">
+                <h2>Estadísticas</h2>
+                <div class="stat-item">
+                    <i class="fas fa-flag"></i>
+                    <span>Reportes totales: <span id="totalReports">0</span></span>
+                </div>
+            </div>
+
+            <div class="ranking-card">
+                <h2>Ranking de EcoVigilantes</h2>
+                <div id="userRanking">
+                    <!-- Se llenará dinámicamente con JavaScript -->
+                </div>
+            </div>
+
+            <div class="challenges-card">
+                <h2>Retos del Mes</h2>
+                <div class="challenge-item">
+                    <i class="fas fa-trash"></i>
+                    <span>#RetoSinBasura</span>
+                </div>
+                <div class="challenge-item">
+                    <i class="fas fa-tree"></i>
+                    <span>#AdoptaUnÁrbol</span>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <footer>
+        <div class="footer-links">
+            <a href="#">Términos</a>
+            <a href="#">Privacidad</a>
+            <a href="#">Contacto</a>
+        </div>
+        <p>&copy; 2024 EcoVigilantes HMO</p>
+    </footer>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Nuestro JavaScript -->
+    <script src="main.js"></script>
+</body>
+</html> 
