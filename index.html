@@ -3,74 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoVigilantes HMO</title>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <!-- Nuestros estilos -->
+    <title>EcoVigilantes HMO - Protegiendo Nuestro Medio Ambiente</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 </head>
 <body>
     <header>
         <div class="logo-container">
             <h1>EcoVigilantes HMO</h1>
-            <p class="slogan">Si todos vemos, todos cuidamos</p>
+            <p class="slogan">Protegiendo Nuestro Medio Ambiente</p>
         </div>
-        <button id="reportButton" class="report-button">
-            <i class="fas fa-plus-circle"></i> Reportar incidencia
-        </button>
+        <nav>
+            <a href="#inicio">Inicio</a>
+            <a href="#mapa">Mapa</a>
+            <a href="#estadisticas">Estadísticas</a>
+            <a href="#comunidad">Comunidad</a>
+        </nav>
     </header>
 
-    <main>
-        <div class="map-container">
-            <div id="map"></div>
+    <section id="inicio" class="hero-section">
+        <div class="hero-content">
+            <h2>Únete a la Protección de Nuestro Medio Ambiente</h2>
+            <p>Reporta problemas ambientales, verifica reportes y gana puntos mientras ayudas a mantener Hermosillo limpio y verde.</p>
+            <div class="hero-buttons">
+                <a href="#mapa" class="cta-button">Ver Plataforma</a>
+                <a href="#comunidad" class="cta-button secondary">Únete a la Comunidad</a>
+            </div>
         </div>
+    </section>
 
-        <aside class="sidebar">
-            <div class="stats-card">
-                <h2>Estadísticas</h2>
-                <div class="stat-item">
-                    <i class="fas fa-flag"></i>
-                    <span>Reportes totales: <span id="totalReports">0</span></span>
+    <section class="impact-section">
+        <h2>Nuestro Impacto</h2>
+        <div class="impact-grid">
+            <div class="impact-card">
+                <i class="fas fa-tree"></i>
+                <h3>Árboles Protegidos</h3>
+                <p>+500 árboles monitoreados y protegidos</p>
+            </div>
+            <div class="impact-card">
+                <i class="fas fa-trash"></i>
+                <h3>Basura Recolectada</h3>
+                <p>+1000 reportes de basura atendidos</p>
+            </div>
+            <div class="impact-card">
+                <i class="fas fa-tint"></i>
+                <h3>Fuentes de Agua</h3>
+                <p>+50 fuentes de agua monitoreadas</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="kpi-section">
+        <h2>Estadísticas en Tiempo Real</h2>
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <i class="fas fa-flag"></i>
+                <div class="kpi-number" id="totalReportsKPI">0</div>
+                <p class="kpi-description">Reportes Totales</p>
+            </div>
+            <div class="kpi-card">
+                <i class="fas fa-users"></i>
+                <div class="kpi-number" id="activeUsersKPI">0</div>
+                <p class="kpi-description">EcoVigilantes Activos</p>
+            </div>
+            <div class="kpi-card">
+                <i class="fas fa-shield-alt"></i>
+                <div class="kpi-number" id="protectedAreasKPI">0</div>
+                <p class="kpi-description">Áreas Protegidas</p>
+            </div>
+            <div class="kpi-card">
+                <i class="fas fa-trophy"></i>
+                <div class="kpi-number" id="completedChallengesKPI">0</div>
+                <p class="kpi-description">Retos Completados</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="charts-section">
+        <h2>Análisis de Datos</h2>
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h3>Tipos de Reportes</h3>
+                <div class="chart-wrapper">
+                    <canvas id="reportTypesChart" width="400" height="400"></canvas>
                 </div>
             </div>
-
-            <div class="ranking-card">
-                <h2>Ranking de EcoVigilantes</h2>
-                <div id="userRanking">
-                    <!-- Se llenará dinámicamente con JavaScript -->
+            <div class="chart-container">
+                <h3>Tendencia Mensual</h3>
+                <div class="chart-wrapper">
+                    <canvas id="monthlyTrendChart" width="400" height="400"></canvas>
                 </div>
             </div>
+        </div>
+    </section>
 
-            <div class="challenges-card">
-                <h2>Retos del Mes</h2>
-                <div class="challenge-item">
-                    <i class="fas fa-trash"></i>
-                    <span>#RetoSinBasura</span>
+    <section id="platform" class="platform-section">
+        <div class="container">
+            <h2>Plataforma de Reportes</h2>
+            <div class="platform-grid">
+                <div class="map-container">
+                    <div id="map"></div>
+                    <div class="map-controls">
+                        <button id="addReportBtn" class="action-button">
+                            <i class="fas fa-plus"></i> Nuevo Reporte
+                        </button>
+                        <div class="layer-controls">
+                            <button class="layer-btn active" data-layer="OpenStreetMap">
+                                <i class="fas fa-map"></i> Mapa
+                            </button>
+                            <button class="layer-btn" data-layer="Satélite">
+                                <i class="fas fa-satellite"></i> Satélite
+                            </button>
+                            <button class="layer-btn" data-layer="Terreno">
+                                <i class="fas fa-mountain"></i> Terreno
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <div class="challenge-item">
-                    <i class="fas fa-tree"></i>
-                    <span>#AdoptaUnÁrbol</span>
+                <div class="platform-sidebar">
+                    <div class="stats-card">
+                        <h3>Estadísticas</h3>
+                        <div class="stat-item">
+                            <i class="fas fa-flag"></i>
+                            <span>Total Reportes: <span id="totalReports">0</span></span>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-users"></i>
+                            <span>Usuarios Activos: <span id="activeUsers">0</span></span>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-clock"></i>
+                            <span>Tiempo Promedio de Respuesta: <span>24h</span></span>
+                        </div>
+                    </div>
+                    <div class="user-card">
+                        <h3>Tu Perfil</h3>
+                        <div class="user-info">
+                            <div class="user-level">
+                                <span id="userLevel">🌱</span>
+                                <span id="userPoints">0</span> pts
+                            </div>
+                            <div class="user-stats">
+                                <div class="stat">
+                                    <i class="fas fa-flag"></i>
+                                    <span>Reportes: <span id="userReports">0</span></span>
+                                </div>
+                                <div class="stat">
+                                    <i class="fas fa-check"></i>
+                                    <span>Verificaciones: <span id="userVerifications">0</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="challenges-card">
+                        <h3>Retos Activos</h3>
+                        <div class="challenge-list">
+                            <div class="challenge-item">
+                                <i class="fas fa-trophy"></i>
+                                <div class="challenge-info">
+                                    <h4>#RetoSinBasura</h4>
+                                    <p>Reporta 10 casos de basura</p>
+                                    <div class="progress-bar">
+                                        <div class="progress" style="width: 30%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="challenge-item">
+                                <i class="fas fa-leaf"></i>
+                                <div class="challenge-info">
+                                    <h4>#AdoptaUnÁrbol</h4>
+                                    <p>Adopta y monitorea un árbol</p>
+                                    <div class="progress-bar">
+                                        <div class="progress" style="width: 50%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </aside>
-    </main>
+        </div>
+    </section>
+
+    <section id="comunidad" class="community-section">
+        <h2>Únete a la Comunidad</h2>
+        <div class="community-grid">
+            <div class="community-card">
+                <i class="fas fa-user-plus"></i>
+                <h3>Regístrate</h3>
+                <p>Únete a nuestra comunidad de EcoVigilantes y comienza a ganar puntos.</p>
+                <button class="community-button">Registrarse</button>
+            </div>
+            <div class="community-card">
+                <i class="fas fa-book"></i>
+                <h3>Aprende</h3>
+                <p>Accede a recursos educativos sobre cuidado ambiental.</p>
+                <button class="community-button">Ver Recursos</button>
+            </div>
+            <div class="community-card">
+                <i class="fas fa-trophy"></i>
+                <h3>Compite</h3>
+                <p>Participa en retos y compite con otros EcoVigilantes.</p>
+                <button class="community-button">Ver Retos</button>
+            </div>
+        </div>
+    </section>
 
     <footer>
-        <div class="footer-links">
-            <a href="#">Términos</a>
-            <a href="#">Privacidad</a>
-            <a href="#">Contacto</a>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>EcoVigilantes HMO</h3>
+                <p>Protegiendo el medio ambiente de Hermosillo desde 2024.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Enlaces Rápidos</h3>
+                <a href="#inicio">Inicio</a>
+                <a href="#mapa">Mapa</a>
+                <a href="#estadisticas">Estadísticas</a>
+                <a href="#comunidad">Comunidad</a>
+            </div>
+            <div class="footer-section">
+                <h3>Contacto</h3>
+                <p>Email: info@ecovigilanteshmo.com</p>
+                <p>Teléfono: (662) 123-4567</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
         </div>
-        <p>&copy; 2024 EcoVigilantes HMO</p>
+        <div class="footer-bottom">
+            <p>&copy; 2024 EcoVigilantes HMO. Todos los derechos reservados.</p>
+        </div>
     </footer>
 
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Nuestro JavaScript -->
     <script src="main.js"></script>
 </body>
 </html> 

@@ -1,471 +1,705 @@
-// Configuración avanzada del sistema
+// Configuración del sistema mejorada
 const CONFIG = {
     HERMOSILLO_COORDS: [29.0892, -110.9613],
     INITIAL_ZOOM: 13,
-    POINTS: {
-        REPORT: 10,
-        VERIFICATION: 20,
-        COMMENT: 5,
-        CHALLENGE_COMPLETION: 50,
-        DAILY_STREAK: 15
+    PUNTOS_POR_REPORTE: 10,
+    PUNTOS_POR_VERIFICACION: 5,
+    PUNTOS_POR_COMENTARIO: 2,
+    PUNTOS_POR_RETO: 50,
+    PUNTOS_POR_RACHA: 20,
+    NIVELES: {
+        NOVATO: { puntos: 0, icono: '🌱', color: '#8BC34A', nombre: 'Novato Eco' },
+        GUARDIAN: { puntos: 100, icono: '🛡️', color: '#4CAF50', nombre: 'Guardián Verde' },
+        MAESTRO: { puntos: 500, icono: '🌳', color: '#2E7D32', nombre: 'Maestro Ambiental' },
+        LEGENDARIO: { puntos: 1000, icono: '🌟', color: '#FFD700', nombre: 'Leyenda Ecológica' }
     },
-    LEVELS: {
-        NOVATO: { min: 0, max: 100, icon: '🌱', color: '#8BC34A' },
-        GUARDIAN: { min: 101, max: 500, icon: '🌿', color: '#4CAF50' },
-        MAESTRO: { min: 501, max: Infinity, icon: '🌳', color: '#2E7D32' }
-    },
-    CHALLENGES: {
+    RETOS: {
         RETO_SIN_BASURA: {
-            id: 'sin_basura',
-            name: '#RetoSinBasura',
-            description: 'Reporta 10 acumulaciones de basura',
-            target: 10,
-            type: 'basura',
-            reward: 100
+            nombre: '#RetoSinBasura',
+            descripcion: 'Reporta 10 casos de basura en la ciudad',
+            meta: 10,
+            recompensa: 50,
+            icono: '🗑️'
         },
         ADOPTA_ARBOL: {
-            id: 'adopta_arbol',
-            name: '#AdoptaUnÁrbol',
-            description: 'Reporta 5 árboles que necesiten cuidado',
-            target: 5,
-            type: 'planta',
-            reward: 150
+            nombre: '#AdoptaUnÁrbol',
+            descripcion: 'Adopta y monitorea un árbol por un mes',
+            meta: 1,
+            recompensa: 100,
+            icono: '🌳'
+        },
+        GUARDIAN_AGUA: {
+            nombre: '#GuardianDelAgua',
+            descripcion: 'Reporta 5 casos de desperdicio de agua',
+            meta: 5,
+            recompensa: 75,
+            icono: '💧'
+        },
+        PROTECTOR_FAUNA: {
+            nombre: '#ProtectorDeFauna',
+            descripcion: 'Ayuda a 3 animales en situación de riesgo',
+            meta: 3,
+            recompensa: 150,
+            icono: '🦊'
         }
     },
-    ACHIEVEMENTS: {
+    LOGROS: {
         PRIMER_REPORTE: {
-            id: 'primer_reporte',
-            name: 'Primer Reporte',
-            description: 'Realiza tu primer reporte ambiental',
-            icon: '🏆'
+            nombre: 'Primer Reporte',
+            descripcion: 'Has realizado tu primer reporte',
+            recompensa: 20,
+            icono: '🎯'
         },
         VERIFICADOR: {
-            id: 'verificador',
-            name: 'Verificador Experto',
-            description: 'Verifica 10 reportes',
-            icon: '🔍',
-            target: 10
+            nombre: 'Verificador',
+            descripcion: 'Has verificado 10 reportes',
+            recompensa: 30,
+            icono: '✅'
         },
         ECO_GUARDIAN: {
-            id: 'eco_guardian',
-            name: 'Eco Guardián',
-            description: 'Alcanza el nivel Guardián',
-            icon: '🛡️'
+            nombre: 'EcoGuardian',
+            descripcion: 'Has alcanzado el nivel Guardian',
+            recompensa: 50,
+            icono: '🛡️'
+        },
+        COMUNIDAD_ACTIVA: {
+            nombre: 'Comunidad Activa',
+            descripcion: 'Has participado en 50 interacciones',
+            recompensa: 100,
+            icono: '👥'
         }
-    }
+    },
+    AREAS_PROTEGIDAS: [
+        { nombre: 'Parque Madero', coordenadas: [29.0892, -110.9613], tipo: 'Parque Urbano' },
+        { nombre: 'Cerro de la Campana', coordenadas: [29.0922, -110.9613], tipo: 'Área Natural' },
+        { nombre: 'Río Sonora', coordenadas: [29.0952, -110.9613], tipo: 'Cuerpo de Agua' },
+        { nombre: 'Bosque de la Ciudad', coordenadas: [29.0882, -110.9603], tipo: 'Bosque Urbano' }
+    ]
 };
 
-// Clase para manejar los reportes
-class Reporte {
-    constructor(coords, type, description, userId, photoUrl = null) {
-        this.id = Date.now() + Math.random().toString(36).substr(2, 9);
-        this.coords = coords;
-        this.type = type;
-        this.description = description;
-        this.userId = userId;
-        this.timestamp = new Date();
-        this.status = 'pendiente';
-        this.verifications = 0;
-        this.comments = [];
-        this.photoUrl = photoUrl;
-        this.severity = this.calcularSeveridad();
-    }
+// Variables globales
+let map;
+let reportes = [];
+let usuarios = [];
+let usuarioActual = null;
+let baseLayers = {};
+let heatmapLayers = {};
 
-    calcularSeveridad() {
-        const severidades = {
-            basura: Math.floor(Math.random() * 3) + 1,
-            fuego: Math.floor(Math.random() * 5) + 1,
-            planta: Math.floor(Math.random() * 3) + 1,
-            agua: Math.floor(Math.random() * 4) + 1
-        };
-        return severidades[this.type];
-    }
+// Variables globales para las gráficas
+let reportTypesChart = null;
+let monthlyTrendChart = null;
 
-    verificar(userId) {
-        if (!this.verificaciones.includes(userId)) {
-            this.verifications++;
-            this.verificaciones.push(userId);
-            if (this.verifications >= 3) {
-                this.status = 'verificado';
-                this.fechaVerificacion = new Date();
-            }
-            return true;
+// Datos simulados mejorados y más realistas
+const datosSimulados = {
+    reportes: [
+        {
+            id: 1,
+            tipo: "basura",
+            coordenadas: [29.0892, -110.9613],
+            descripcion: "Acumulación de basura en el parque Madero, principalmente plásticos y desechos orgánicos",
+            usuario: "Juan Pérez",
+            fecha: "2024-03-15T10:30:00",
+            verificaciones: ["María López", "Carlos Ruiz"],
+            comentarios: [
+                {
+                    usuario: "María López",
+                    texto: "Ya se reportó a servicios municipales, se espera recolección en las próximas horas",
+                    fecha: "2024-03-15T11:00:00"
+                },
+                {
+                    usuario: "Carlos Ruiz",
+                    texto: "He verificado el área, la situación persiste pero se ha reducido la acumulación",
+                    fecha: "2024-03-15T14:30:00"
+                }
+            ],
+            severidad: 2,
+            estado: "En proceso",
+            fotos: ["basura1.jpg", "basura2.jpg"]
+        },
+        {
+            id: 2,
+            tipo: "fuego",
+            coordenadas: [29.0922, -110.9613],
+            descripcion: "Posible incendio forestal en Cerro de la Campana, humo visible desde el centro",
+            usuario: "Ana Martínez",
+            fecha: "2024-03-14T15:45:00",
+            verificaciones: ["Pedro Sánchez", "Laura García"],
+            comentarios: [
+                {
+                    usuario: "Pedro Sánchez",
+                    texto: "Bomberos en camino, se recomienda evitar la zona",
+                    fecha: "2024-03-14T16:00:00"
+                },
+                {
+                    usuario: "Laura García",
+                    texto: "El incendio ha sido controlado, bomberos realizando labores de enfriamiento",
+                    fecha: "2024-03-14T18:30:00"
+                }
+            ],
+            severidad: 3,
+            estado: "Resuelto",
+            fotos: ["incendio1.jpg", "incendio2.jpg"]
+        },
+        {
+            id: 3,
+            tipo: "planta",
+            coordenadas: [29.0952, -110.9613],
+            descripcion: "Árbol enfermo en el Bosque de la Ciudad, necesita atención especializada",
+            usuario: "Roberto Torres",
+            fecha: "2024-03-13T09:15:00",
+            verificaciones: ["María López"],
+            comentarios: [
+                {
+                    usuario: "María López",
+                    texto: "Se ha contactado con el departamento de parques para evaluación",
+                    fecha: "2024-03-13T10:00:00"
+                }
+            ],
+            severidad: 1,
+            estado: "En evaluación",
+            fotos: ["arbol1.jpg"]
+        },
+        {
+            id: 4,
+            tipo: "agua",
+            coordenadas: [29.0882, -110.9603],
+            descripcion: "Fuga de agua en tubería principal, desperdicio significativo",
+            usuario: "Carlos Ruiz",
+            fecha: "2024-03-12T08:30:00",
+            verificaciones: ["Ana Martínez"],
+            comentarios: [
+                {
+                    usuario: "Ana Martínez",
+                    texto: "Reportado a la Comisión Estatal del Agua, en espera de respuesta",
+                    fecha: "2024-03-12T09:00:00"
+                }
+            ],
+            severidad: 2,
+            estado: "En proceso",
+            fotos: ["agua1.jpg", "agua2.jpg"]
         }
-        return false;
-    }
-
-    agregarComentario(userId, text) {
-        this.comments.push({
-            userId,
-            text,
-            timestamp: new Date(),
-            likes: 0
-        });
-    }
-
-    likeComentario(commentIndex) {
-        if (this.comments[commentIndex]) {
-            this.comments[commentIndex].likes++;
+    ],
+    usuarios: [
+        {
+            nombre: "Juan Pérez",
+            puntos: 150,
+            nivel: "GUARDIAN",
+            reportes: [1],
+            verificaciones: [2, 3],
+            retos: [
+                { nombre: "#RetoSinBasura", completado: false, progreso: 3 },
+                { nombre: "#AdoptaUnÁrbol", completado: false, progreso: 5 },
+                { nombre: "#GuardianDelAgua", completado: false, progreso: 2 }
+            ],
+            logros: ["PRIMER_REPORTE", "VERIFICADOR"],
+            racha: 5,
+            ultimaActividad: "2024-03-15T14:30:00",
+            foto: "usuario1.jpg"
+        },
+        {
+            nombre: "Ana Martínez",
+            puntos: 280,
+            nivel: "MAESTRO",
+            reportes: [2],
+            verificaciones: [1, 4],
+            retos: [
+                { nombre: "#RetoSinBasura", completado: true, progreso: 10 },
+                { nombre: "#AdoptaUnÁrbol", completado: true, progreso: 1 },
+                { nombre: "#ProtectorDeFauna", completado: false, progreso: 2 }
+            ],
+            logros: ["PRIMER_REPORTE", "VERIFICADOR", "ECO_GUARDIAN"],
+            racha: 12,
+            ultimaActividad: "2024-03-14T18:30:00",
+            foto: "usuario2.jpg"
         }
-    }
+    ]
+};
+
+// Cargar datos simulados
+function cargarDatosSimulados() {
+    reportes = datosSimulados.reportes;
+    usuarios = datosSimulados.usuarios;
+    usuarioActual = usuarios[0];
+    actualizarEstadisticas();
+    actualizarMapa();
 }
 
-// Clase para manejar usuarios
-class Usuario {
-    constructor(id, nombre) {
-        this.id = id;
-        this.nombre = nombre;
-        this.puntos = parseInt(localStorage.getItem(`user_${id}_points`)) || 0;
-        this.reportes = JSON.parse(localStorage.getItem(`user_${id}_reports`)) || [];
-        this.verificaciones = JSON.parse(localStorage.getItem(`user_${id}_verifications`)) || [];
-        this.achievements = JSON.parse(localStorage.getItem(`user_${id}_achievements`)) || [];
-        this.challenges = JSON.parse(localStorage.getItem(`user_${id}_challenges`)) || this.inicializarChallenges();
-        this.streak = JSON.parse(localStorage.getItem(`user_${id}_streak`)) || { count: 0, lastDate: null };
-        this.nivel = this.calcularNivel();
-    }
+// Inicialización del mapa
+function initMap() {
+    map = L.map('map', {
+        zoomControl: true,
+        maxZoom: 18,
+        minZoom: 10,
+        preferCanvas: true
+    }).setView(CONFIG.HERMOSILLO_COORDS, CONFIG.INITIAL_ZOOM);
 
-    inicializarChallenges() {
-        return Object.keys(CONFIG.CHALLENGES).map(key => ({
-            ...CONFIG.CHALLENGES[key],
-            progress: 0,
-            completed: false
-        }));
-    }
+    // Capas base
+    baseLayers = {
+        "OpenStreetMap": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19
+        }),
+        "Satélite": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri',
+            maxZoom: 19
+        }),
+        "Terreno": L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}.jpg', {
+            attribution: 'Map tiles by Stamen Design',
+            maxZoom: 18
+        })
+    };
 
-    calcularNivel() {
-        if (this.puntos <= CONFIG.LEVELS.NOVATO.max) return 'NOVATO';
-        if (this.puntos <= CONFIG.LEVELS.GUARDIAN.max) return 'GUARDIAN';
-        return 'MAESTRO';
-    }
+    baseLayers["OpenStreetMap"].addTo(map);
 
-    agregarPuntos(puntos, razon) {
-        const oldNivel = this.nivel;
-        this.puntos += puntos;
-        this.nivel = this.calcularNivel();
-        localStorage.setItem(`user_${id}_points`, this.puntos);
-        
-        if (oldNivel !== this.nivel) {
-            this.desbloquearAchievement('ECO_GUARDIAN');
-            Notificacion.mostrar(`¡Felicidades! Has alcanzado el nivel ${this.nivel}`, 'success');
-        }
-        
-        this.actualizarStreak();
-        return this.nivel;
-    }
+    // Capas de heatmap
+    heatmapLayers = {
+        "Reportes de Basura": L.layerGroup(),
+        "Reportes de Fuego": L.layerGroup(),
+        "Reportes de Plantas": L.layerGroup(),
+        "Reportes de Agua": L.layerGroup()
+    };
 
-    actualizarStreak() {
-        const hoy = new Date().toDateString();
-        if (this.streak.lastDate !== hoy) {
-            const ayer = new Date();
-            ayer.setDate(ayer.getDate() - 1);
-            if (this.streak.lastDate === ayer.toDateString()) {
-                this.streak.count++;
-            } else {
-                this.streak.count = 1;
-            }
-            this.streak.lastDate = hoy;
-            localStorage.setItem(`user_${id}_streak`, JSON.stringify(this.streak));
+    // Agregar controles de capas
+    L.control.layers(baseLayers, heatmapLayers).addTo(map);
+
+    // Event listeners para los botones de capas
+    document.querySelectorAll('.layer-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const layerName = btn.dataset.layer;
+            document.querySelectorAll('.layer-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
             
-            if (this.streak.count > 0) {
-                this.agregarPuntos(CONFIG.POINTS.DAILY_STREAK, 'Racha diaria');
-            }
-        }
-    }
-
-    desbloquearAchievement(achievementId) {
-        if (!this.achievements.includes(achievementId)) {
-            this.achievements.push(achievementId);
-            localStorage.setItem(`user_${id}_achievements`, JSON.stringify(this.achievements));
-            const achievement = CONFIG.ACHIEVEMENTS[achievementId];
-            Notificacion.mostrar(`¡Logro desbloqueado! ${achievement.icon} ${achievement.name}`, 'success');
-        }
-    }
-
-    actualizarChallenge(challengeId, progress) {
-        const challenge = this.challenges.find(c => c.id === challengeId);
-        if (challenge && !challenge.completed) {
-            challenge.progress = progress;
-            if (challenge.progress >= challenge.target) {
-                challenge.completed = true;
-                this.agregarPuntos(challenge.reward, `Completar reto ${challenge.name}`);
-            }
-            localStorage.setItem(`user_${id}_challenges`, JSON.stringify(this.challenges));
-        }
-    }
+            Object.values(baseLayers).forEach(layer => layer.remove());
+            baseLayers[layerName].addTo(map);
+        });
+    });
 }
 
-// Sistema de notificaciones mejorado
-class Notificacion {
-    static mostrar(mensaje, tipo = 'info', duracion = 3000) {
-        const notification = document.createElement('div');
-        notification.className = `notification fade-in ${tipo}`;
-        notification.innerHTML = `
-            <i class="fas fa-${this.getIcon(tipo)}"></i>
-            <div class="notification-content">${mensaje}</div>
-            <button class="notification-close" onclick="this.parentElement.remove()">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-        document.body.appendChild(notification);
-        setTimeout(() => {
-            notification.classList.add('fade-out');
-            setTimeout(() => notification.remove(), 500);
-        }, duracion);
-    }
-
-    static getIcon(tipo) {
-        const icons = {
-            info: 'info-circle',
-            success: 'check-circle',
-            warning: 'exclamation-circle',
-            error: 'times-circle',
-            achievement: 'trophy',
-            challenge: 'flag-checkered'
-        };
-        return icons[tipo] || 'info-circle';
-    }
-}
-
-// Íconos personalizados para diferentes tipos de reportes
-const reportIcons = {
-    basura: L.divIcon({
-        className: 'custom-icon',
-        html: '<i class="fas fa-trash" style="color: #2E7D32; font-size: 24px;"></i>',
-        iconSize: [24, 24],
-        iconAnchor: [12, 12]
-    }),
-    fuego: L.divIcon({
-        className: 'custom-icon',
-        html: '<i class="fas fa-fire" style="color: #FF5722; font-size: 24px;"></i>',
-        iconSize: [24, 24],
-        iconAnchor: [12, 12]
-    }),
-    planta: L.divIcon({
-        className: 'custom-icon',
-        html: '<i class="fas fa-leaf" style="color: #4CAF50; font-size: 24px;"></i>',
-        iconSize: [24, 24],
-        iconAnchor: [12, 12]
-    }),
-    agua: L.divIcon({
-        className: 'custom-icon',
-        html: '<i class="fas fa-tint" style="color: #2196F3; font-size: 24px;"></i>',
-        iconSize: [24, 24],
-        iconAnchor: [12, 12]
-    })
-};
-
-// Inicialización del mapa con más opciones
-const map = L.map('map', {
-    zoomControl: true,
-    maxZoom: 18,
-    minZoom: 10
-}).setView(CONFIG.HERMOSILLO_COORDS, CONFIG.INITIAL_ZOOM);
-
-// Capas base
-const baseLayers = {
-    "OpenStreetMap": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'),
-    "Satélite": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'),
-    "Terreno": L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png')
-};
-
-// Agregar la capa base por defecto
-baseLayers["OpenStreetMap"].addTo(map);
-
-// Capas de calor
-const heatLayers = {
-    "Reportes de Basura": L.layerGroup(),
-    "Reportes de Fuego": L.layerGroup(),
-    "Reportes de Plantas": L.layerGroup(),
-    "Reportes de Agua": L.layerGroup()
-};
-
-// Agregar controles de capas
-L.control.layers(baseLayers, heatLayers).addTo(map);
-
-// Estado de la aplicación
-let reportCount = 0;
-let currentUser = new Usuario('user_' + Math.random().toString(36).substr(2, 9), 'Usuario Anónimo');
-let activeReports = new Map();
-let heatMapData = {
-    basura: [],
-    fuego: [],
-    planta: [],
-    agua: []
-};
-
-// Reportes iniciales simulados
-const initialReports = [
-    {
-        coords: [29.0892, -110.9613],
-        type: 'basura',
-        description: 'Acumulación de basura en parque',
-        userId: 'system'
-    },
-    {
-        coords: [29.0992, -110.9713],
-        type: 'fuego',
-        description: 'Quema ilegal de basura',
-        userId: 'system'
-    },
-    {
-        coords: [29.0792, -110.9513],
-        type: 'planta',
-        description: 'Árbol enfermo necesita atención',
-        userId: 'system'
-    }
-];
-
-// Función para agregar un marcador al mapa
+// Función para agregar marcadores de reporte
 function addReportMarker(reporte) {
-    const marker = L.marker(reporte.coords, {
-        icon: reportIcons[reporte.type],
-        riseOnHover: true
-    }).addTo(map);
+    const iconosReporte = {
+        basura: L.divIcon({
+            className: 'report-icon basura',
+            html: '🗑️',
+            iconSize: [30, 30],
+            popupAnchor: [0, -15]
+        }),
+        fuego: L.divIcon({
+            className: 'report-icon fuego',
+            html: '🔥',
+            iconSize: [30, 30],
+            popupAnchor: [0, -15]
+        }),
+        planta: L.divIcon({
+            className: 'report-icon planta',
+            html: '🌱',
+            iconSize: [30, 30],
+            popupAnchor: [0, -15]
+        }),
+        agua: L.divIcon({
+            className: 'report-icon agua',
+            html: '💧',
+            iconSize: [30, 30],
+            popupAnchor: [0, -15]
+        })
+    };
+
+    const marker = L.marker(reporte.coordenadas, {
+        icon: iconosReporte[reporte.tipo]
+    });
 
     const popupContent = `
         <div class="report-popup">
             <div class="report-header">
-                <h3>${reporte.type.charAt(0).toUpperCase() + reporte.type.slice(1)}</h3>
-                <span class="severity-badge">Severidad: ${'⚠️'.repeat(reporte.severity)}</span>
+                <h3>Reporte de ${reporte.tipo}</h3>
+                <span class="severity-badge">Severidad: ${reporte.severidad}</span>
             </div>
-            <p>${reporte.description}</p>
-            <small>Reportado: ${reporte.timestamp.toLocaleDateString()}</small>
-            ${reporte.photoUrl ? `<img src="${reporte.photoUrl}" alt="Foto del reporte" class="report-photo">` : ''}
+            <p>${reporte.descripcion}</p>
             <div class="report-actions">
-                <button onclick="verificarReporte('${reporte.id}')" class="verify-btn">
-                    <i class="fas fa-check"></i> Verificar (${reporte.verifications}/3)
+                <button class="verify-btn" onclick="verificarReporte(${reporte.id})">
+                    <i class="fas fa-check"></i> Verificar
                 </button>
-                <button onclick="mostrarComentarios('${reporte.id}')" class="comment-btn">
+                <button class="comment-btn" onclick="mostrarFormularioComentario(${reporte.id})">
                     <i class="fas fa-comment"></i> Comentar
                 </button>
             </div>
-            <div id="comments-${reporte.id}" class="comments-section"></div>
+            <div class="comments-section" id="comments-${reporte.id}">
+                ${reporte.comentarios.map(c => `
+                    <div class="comment">
+                        <div class="comment-header">
+                            <span>${c.usuario}</span>
+                            <span>${new Date(c.fecha).toLocaleDateString()}</span>
+                        </div>
+                        <div class="comment-content">${c.texto}</div>
+                    </div>
+                `).join('')}
+            </div>
         </div>
     `;
 
-    marker.bindPopup(popupContent);
-    activeReports.set(reporte.id, { marker, reporte });
-    
-    // Actualizar mapa de calor
-    heatMapData[reporte.type].push(reporte.coords);
-    updateHeatMap(reporte.type);
-    
+    marker.bindPopup(popupContent, {
+        maxWidth: 300,
+        className: 'custom-popup'
+    });
+    marker.addTo(map);
     return marker;
 }
 
-// Función para verificar un reporte
-function verificarReporte(reportId) {
-    const reportData = activeReports.get(reportId);
-    if (reportData) {
-        if (reportData.reporte.verificar(currentUser.id)) {
-            currentUser.agregarPuntos(CONFIG.POINTS.VERIFICATION, 'Reporte verificado');
-            updateRanking();
-        }
-    }
+// Función para actualizar el mapa
+function actualizarMapa() {
+    // Limpiar marcadores existentes
+    Object.values(heatmapLayers).forEach(layer => layer.clearLayers());
+
+    // Agregar nuevos marcadores
+    reportes.forEach(reporte => {
+        const marker = addReportMarker(reporte);
+        heatmapLayers[`Reportes de ${reporte.tipo.charAt(0).toUpperCase() + reporte.tipo.slice(1)}`].addLayer(marker);
+    });
 }
 
-// Función para mostrar comentarios
-function mostrarComentarios(reportId) {
-    const reportData = activeReports.get(reportId);
-    if (reportData) {
-        const commentsSection = document.getElementById(`comments-${reportId}`);
-        const commentForm = `
-            <div class="comment-form">
-                <textarea placeholder="Escribe tu comentario..."></textarea>
-                <button onclick="agregarComentario('${reportId}')">Enviar</button>
-            </div>
-        `;
-        commentsSection.innerHTML = commentForm;
+// Función para mostrar el formulario de nuevo reporte mejorada
+function mostrarFormularioReporte() {
+    const tiposReporte = [
+        { id: 1, nombre: 'Basura', icono: '🗑️' },
+        { id: 2, nombre: 'Fuego', icono: '🔥' },
+        { id: 3, nombre: 'Planta', icono: '🌱' },
+        { id: 4, nombre: 'Agua', icono: '💧' }
+    ];
+    
+    const tipoSeleccionado = prompt(
+        'Selecciona el tipo de reporte:\n' +
+        tiposReporte.map(t => `${t.id}. ${t.icono} ${t.nombre}`).join('\n')
+    );
+    
+    if (!tipoSeleccionado || tipoSeleccionado < 1 || tipoSeleccionado > 4) {
+        mostrarNotificacion('Tipo de reporte inválido', 'error');
+        return;
+    }
+
+    const descripcion = prompt('Describe el problema con detalle:');
+    if (!descripcion) {
+        mostrarNotificacion('La descripción es requerida', 'error');
+        return;
+    }
+
+    const severidad = prompt('Nivel de severidad (1-3):\n1. Baja\n2. Media\n3. Alta');
+    if (!severidad || severidad < 1 || severidad > 3) {
+        mostrarNotificacion('Severidad inválida', 'error');
+        return;
+    }
+
+    const lat = CONFIG.HERMOSILLO_COORDS[0] + (Math.random() - 0.5) * 0.1;
+    const lng = CONFIG.HERMOSILLO_COORDS[1] + (Math.random() - 0.5) * 0.1;
+
+    const nuevoReporte = {
+        id: reportes.length + 1,
+        tipo: tiposReporte[tipoSeleccionado - 1].nombre.toLowerCase(),
+        coordenadas: [lat, lng],
+        descripcion,
+        usuario: usuarioActual.nombre,
+        fecha: new Date().toISOString(),
+        verificaciones: [],
+        comentarios: [],
+        severidad: parseInt(severidad),
+        estado: "Nuevo",
+        fotos: []
+    };
+
+    reportes.push(nuevoReporte);
+    usuarioActual.puntos += CONFIG.PUNTOS_POR_REPORTE;
+    
+    // Verificar si se completó algún reto
+    const retoSinBasura = usuarioActual.retos.find(r => r.nombre === '#RetoSinBasura');
+    if (retoSinBasura && nuevoReporte.tipo === 'basura') {
+        retoSinBasura.progreso++;
+        if (retoSinBasura.progreso >= CONFIG.RETOS.RETO_SIN_BASURA.meta) {
+            retoSinBasura.completado = true;
+            usuarioActual.puntos += CONFIG.RETOS.RETO_SIN_BASURA.recompensa;
+            mostrarNotificacion(`¡Reto completado! #RetoSinBasura +${CONFIG.RETOS.RETO_SIN_BASURA.recompensa} puntos`, 'success');
+        }
+    }
+
+    actualizarEstadisticas();
+    actualizarMapa();
+    mostrarNotificacion('¡Reporte agregado! +10 puntos', 'success');
+}
+
+// Función para verificar un reporte
+function verificarReporte(id) {
+    const reporte = reportes.find(r => r.id === id);
+    if (reporte && !reporte.verificaciones.includes(usuarioActual.nombre)) {
+        reporte.verificaciones.push(usuarioActual.nombre);
+        usuarioActual.puntos += CONFIG.PUNTOS_POR_VERIFICACION;
+        actualizarEstadisticas();
+        actualizarMapa();
+        mostrarNotificacion('¡Reporte verificado! +5 puntos', 'success');
     }
 }
 
 // Función para agregar un comentario
-function agregarComentario(reportId) {
-    const reportData = activeReports.get(reportId);
-    if (reportData) {
-        const textarea = document.querySelector(`#comments-${reportId} textarea`);
-        if (textarea.value.trim()) {
-            reportData.reporte.agregarComentario(currentUser.id, textarea.value);
-            textarea.value = '';
-            Notificacion.mostrar('Comentario agregado', 'success');
-        }
+function agregarComentario(id, texto) {
+    const reporte = reportes.find(r => r.id === id);
+    if (reporte) {
+        reporte.comentarios.push({
+            usuario: usuarioActual.nombre,
+            texto,
+            fecha: new Date().toISOString()
+        });
+        usuarioActual.puntos += CONFIG.PUNTOS_POR_COMENTARIO;
+        actualizarEstadisticas();
+        actualizarMapa();
+        mostrarNotificacion('¡Comentario agregado! +2 puntos', 'info');
     }
 }
 
-// Función para actualizar el contador de reportes
-function updateReportCount() {
-    document.getElementById('totalReports').textContent = reportCount;
+// Función para mostrar el formulario de comentario
+function mostrarFormularioComentario(id) {
+    const texto = prompt('Ingresa tu comentario:');
+    if (texto) {
+        agregarComentario(id, texto);
+    }
 }
 
-// Función para actualizar el ranking
-function updateRanking() {
-    const rankingContainer = document.getElementById('userRanking');
-    const nivel = CONFIG.LEVELS[currentUser.nivel];
-    rankingContainer.innerHTML = `
-        <div class="ranking-item">
-            <span>${currentUser.nombre}</span>
-            <span class="level-badge">${nivel.icon} ${currentUser.nivel}</span>
-            <span class="points">${currentUser.puntos} pts</span>
+// Función para animar números
+function animateValue(element, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        const value = Math.floor(progress * (end - start) + start);
+        element.textContent = value;
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
+// Función para actualizar estadísticas mejorada
+function actualizarEstadisticas() {
+    // Actualizar KPIs con animación
+    const totalReports = reportes.length;
+    const activeUsers = new Set(reportes.map(r => r.usuario)).size;
+    const protectedAreas = Math.floor(reportes.length / 10);
+    const completedChallenges = usuarioActual.retos.filter(r => r.completado).length;
+
+    animateValue(document.getElementById('totalReportsKPI'), 0, totalReports, 1000);
+    animateValue(document.getElementById('activeUsersKPI'), 0, activeUsers, 1000);
+    animateValue(document.getElementById('protectedAreasKPI'), 0, protectedAreas, 1000);
+    animateValue(document.getElementById('completedChallengesKPI'), 0, completedChallenges, 1000);
+
+    // Actualizar estadísticas de usuario
+    document.getElementById('userLevel').textContent = CONFIG.NIVELES[usuarioActual.nivel].icono;
+    animateValue(document.getElementById('userPoints'), 0, usuarioActual.puntos, 1000);
+    animateValue(document.getElementById('userReports'), 0, usuarioActual.reportes.length, 1000);
+    animateValue(document.getElementById('userVerifications'), 0, usuarioActual.verificaciones.length, 1000);
+
+    // Actualizar estadísticas en tiempo real
+    document.getElementById('totalReports').textContent = totalReports;
+    document.getElementById('activeUsers').textContent = activeUsers;
+
+    // Actualizar progreso de retos
+    const retoSinBasura = usuarioActual.retos.find(r => r.nombre === '#RetoSinBasura');
+    const adoptaArbol = usuarioActual.retos.find(r => r.nombre === '#AdoptaUnÁrbol');
+
+    if (retoSinBasura) {
+        const progress = (retoSinBasura.progreso / CONFIG.RETOS.RETO_SIN_BASURA.meta) * 100;
+        document.querySelector('.challenge-item:nth-child(1) .progress').style.width = `${progress}%`;
+    }
+
+    if (adoptaArbol) {
+        const progress = (adoptaArbol.progreso / CONFIG.RETOS.ADOPTA_ARBOL.meta) * 100;
+        document.querySelector('.challenge-item:nth-child(2) .progress').style.width = `${progress}%`;
+    }
+
+    // Actualizar gráficas
+    updateCharts();
+}
+
+// Función para mostrar notificaciones mejorada
+function mostrarNotificacion(mensaje, tipo) {
+    const notificacion = document.createElement('div');
+    notificacion.className = `notification ${tipo}`;
+    notificacion.innerHTML = `
+        <div class="notification-content">
+            <i class="fas ${tipo === 'success' ? 'fa-check-circle' : 
+                           tipo === 'error' ? 'fa-exclamation-circle' : 
+                           'fa-info-circle'}"></i>
+            <span>${mensaje}</span>
         </div>
     `;
+
+    document.body.appendChild(notificacion);
+    
+    // Animación de entrada
+    notificacion.style.animation = 'slideIn 0.3s ease-out';
+    
+    // Eliminar después de 3 segundos con animación de salida
+    setTimeout(() => {
+        notificacion.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => notificacion.remove(), 300);
+    }, 3000);
 }
 
-// Evento para el botón de reportar
-document.getElementById('reportButton').addEventListener('click', () => {
-    const randomLat = CONFIG.HERMOSILLO_COORDS[0] + (Math.random() - 0.5) * 0.1;
-    const randomLng = CONFIG.HERMOSILLO_COORDS[1] + (Math.random() - 0.5) * 0.1;
-    
-    const reportTypes = ['basura', 'fuego', 'planta', 'agua'];
-    const randomType = reportTypes[Math.floor(Math.random() * reportTypes.length)];
-    
-    const nuevoReporte = new Reporte(
-        [randomLat, randomLng],
-        randomType,
-        `Reporte automático #${reportCount + 1}`,
-        currentUser.id
-    );
-    
-    addReportMarker(nuevoReporte);
-    currentUser.agregarReporte(nuevoReporte);
-    reportCount++;
-    
-    const nuevoNivel = currentUser.agregarPuntos(CONFIG.POINTS.REPORT, 'Reporte automático');
-    if (nuevoNivel !== currentUser.nivel) {
-        Notificacion.mostrar(`¡Felicidades! Has alcanzado el nivel ${nuevoNivel}`, 'success');
+// Función para inicializar gráficas
+function initCharts() {
+    // Destruir gráficas existentes si existen
+    if (reportTypesChart) {
+        reportTypesChart.destroy();
     }
-    
-    updateReportCount();
-    updateRanking();
-    Notificacion.mostrar(`+${CONFIG.POINTS.REPORT} puntos por tu reporte`, 'success');
-});
+    if (monthlyTrendChart) {
+        monthlyTrendChart.destroy();
+    }
 
-// Agregar reportes iniciales
-initialReports.forEach(reportData => {
-    const reporte = new Reporte(
-        reportData.coords,
-        reportData.type,
-        reportData.description,
-        reportData.userId
-    );
-    addReportMarker(reporte);
-    reportCount++;
-});
+    // Datos de ejemplo
+    const reportData = {
+        tipos: {
+            basura: reportes.filter(r => r.tipo === 'basura').length,
+            fuego: reportes.filter(r => r.tipo === 'fuego').length,
+            planta: reportes.filter(r => r.tipo === 'planta').length,
+            agua: reportes.filter(r => r.tipo === 'agua').length
+        },
+        tendencia: {
+            labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+            data: [10, 15, 20, 25, 30, 35]
+        }
+    };
 
-// Inicializar la UI
-updateReportCount();
-updateRanking();
+    // Configuración común
+    const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+            duration: 1000,
+            easing: 'easeInOutQuart'
+        },
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    font: {
+                        size: 12,
+                        family: "'Inter', sans-serif"
+                    },
+                    padding: 20
+                }
+            }
+        }
+    };
 
-// Función para actualizar el mapa de calor
-function updateHeatMap(type) {
-    const layer = heatLayers[`Reportes de ${type.charAt(0).toUpperCase() + type.slice(1)}`];
-    layer.clearLayers();
-    
-    if (heatMapData[type].length > 0) {
-        const heat = L.heatLayer(heatMapData[type], {
-            radius: 25,
-            blur: 15,
-            maxZoom: 15
+    // Inicializar gráfica de tipos de reportes
+    const reportTypesCtx = document.getElementById('reportTypesChart');
+    if (reportTypesCtx) {
+        reportTypesChart = new Chart(reportTypesCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Basura', 'Fuego', 'Plantas', 'Agua'],
+                datasets: [{
+                    data: Object.values(reportData.tipos),
+                    backgroundColor: [
+                        'rgba(255, 152, 0, 0.8)',
+                        'rgba(244, 67, 54, 0.8)',
+                        'rgba(76, 175, 80, 0.8)',
+                        'rgba(33, 150, 243, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 152, 0, 1)',
+                        'rgba(244, 67, 54, 1)',
+                        'rgba(76, 175, 80, 1)',
+                        'rgba(33, 150, 243, 1)'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                ...commonOptions,
+                cutout: '70%',
+                plugins: {
+                    ...commonOptions.plugins,
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = Math.round((value / total) * 100);
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
         });
-        layer.addLayer(heat);
     }
-} 
+
+    // Inicializar gráfica de tendencia mensual
+    const monthlyTrendCtx = document.getElementById('monthlyTrendChart');
+    if (monthlyTrendCtx) {
+        monthlyTrendChart = new Chart(monthlyTrendCtx, {
+            type: 'line',
+            data: {
+                labels: reportData.tendencia.labels,
+                datasets: [{
+                    label: 'Reportes',
+                    data: reportData.tendencia.data,
+                    borderColor: 'rgba(46, 125, 50, 0.8)',
+                    backgroundColor: 'rgba(46, 125, 50, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: 'rgba(46, 125, 50, 1)',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                ...commonOptions,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+}
+
+// Función para actualizar gráficas
+function updateCharts() {
+    if (reportTypesChart || monthlyTrendChart) {
+        initCharts();
+    }
+}
+
+// Inicialización cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', () => {
+    initMap();
+    cargarDatosSimulados();
+    
+    // Inicializar gráficas después de un pequeño retraso
+    setTimeout(() => {
+        initCharts();
+    }, 500);
+    
+    // Inicializar AOS con configuración mejorada
+    AOS.init({
+        duration: 800,
+        easing: 'ease-out',
+        once: true
+    });
+
+    // Agregar event listeners mejorados
+    document.getElementById('addReportBtn')?.addEventListener('click', mostrarFormularioReporte);
+    
+    // Inicializar KPIs con valores iniciales
+    actualizarEstadisticas();
+}); 

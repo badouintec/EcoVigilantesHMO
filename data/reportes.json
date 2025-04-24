@@ -1,0 +1,96 @@
+{
+    "reportes": [
+        {
+            "id": 1,
+            "tipo": "basura",
+            "coordenadas": [29.0892, -110.9613],
+            "descripcion": "Acumulación de basura en el parque Madero",
+            "usuario": "Juan Pérez",
+            "fecha": "2024-03-15T10:30:00",
+            "verificaciones": ["María López", "Carlos Ruiz"],
+            "comentarios": [
+                {
+                    "usuario": "María López",
+                    "texto": "Ya se reportó a servicios municipales",
+                    "fecha": "2024-03-15T11:00:00"
+                }
+            ],
+            "severidad": 2
+        },
+        {
+            "id": 2,
+            "tipo": "fuego",
+            "coordenadas": [29.0922, -110.9613],
+            "descripcion": "Posible incendio forestal en Cerro de la Campana",
+            "usuario": "Ana Martínez",
+            "fecha": "2024-03-14T15:45:00",
+            "verificaciones": ["Pedro Sánchez"],
+            "comentarios": [
+                {
+                    "usuario": "Pedro Sánchez",
+                    "texto": "Bomberos en camino",
+                    "fecha": "2024-03-14T16:00:00"
+                }
+            ],
+            "severidad": 3
+        },
+        {
+            "id": 3,
+            "tipo": "planta",
+            "coordenadas": [29.0952, -110.9613],
+            "descripcion": "Árbol enfermo en la colonia Pitic",
+            "usuario": "Luis García",
+            "fecha": "2024-03-13T09:15:00",
+            "verificaciones": [],
+            "comentarios": [],
+            "severidad": 1
+        },
+        {
+            "id": 4,
+            "tipo": "agua",
+            "coordenadas": [29.0982, -110.9613],
+            "descripcion": "Contaminación en el arroyo La Sauceda",
+            "usuario": "Sofía Ramírez",
+            "fecha": "2024-03-12T14:20:00",
+            "verificaciones": ["Roberto Torres"],
+            "comentarios": [
+                {
+                    "usuario": "Roberto Torres",
+                    "texto": "Se tomaron muestras para análisis",
+                    "fecha": "2024-03-12T15:30:00"
+                }
+            ],
+            "severidad": 2
+        }
+    ],
+    "usuarios": [
+        {
+            "nombre": "Juan Pérez",
+            "puntos": 150,
+            "nivel": "GUARDIAN",
+            "reportes": [1],
+            "verificaciones": [2, 4]
+        },
+        {
+            "nombre": "Ana Martínez",
+            "puntos": 80,
+            "nivel": "NOVATO",
+            "reportes": [2],
+            "verificaciones": [1]
+        },
+        {
+            "nombre": "Luis García",
+            "puntos": 45,
+            "nivel": "NOVATO",
+            "reportes": [3],
+            "verificaciones": []
+        },
+        {
+            "nombre": "Sofía Ramírez",
+            "puntos": 200,
+            "nivel": "MAESTRO",
+            "reportes": [4],
+            "verificaciones": [1, 3]
+        }
+    ]
+} 
